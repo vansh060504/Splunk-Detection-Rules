@@ -1,0 +1,9 @@
+index=main EventCode=4740
+| where Account_Name!="-"
+| bin _time span=10m
+| stats count as lockout_count dc(Caller_Computer_Name) as src_machines by Account_Name, _time
+| where lockout_count >= 3 OR src_machines >= 2
+| eval risk=case(
+lockout_count>=10,"HIGH_RISK_LOCKOUT",
+lockout_count>=3,"MEDIUM_RISK_LOCKOUT"
+)
