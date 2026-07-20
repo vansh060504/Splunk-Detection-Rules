@@ -1,0 +1,6 @@
+index=main EventCode=4625
+| where Account_Name!="-"
+| bin _time span=5m
+| stats count as fail_count dc(Account_Name) as user_count by Source_Network_Address, _time
+| where fail_count >= 30 OR (fail_count >= 20 AND user_count >= 3)
+| eval risk="BRUTE_FORCE_OR_PASSWORD_SPRAY"
