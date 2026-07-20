@@ -1,0 +1,11 @@
+index=main EventCode=4624 Account_Name!="*$"
+| eval hour=strftime(_time,"%H")
+| where hour<8 OR hour>=20
+| bin _time span=15m
+| stats count as login_count dc(Source_Network_Address) as src_ips by Account_Name, _time
+| where login_count >= 2 OR src_ips > 1
+| eval risk=case(
+login_count>=10,"CRITICAL_AFTER_HOURS_ACTIVITY",
+login_count>=3,"HIGH_RISK_AFTER_HOURS",
+1=1,"MEDIUM_RISK_AFTER_HOURS"
+)
