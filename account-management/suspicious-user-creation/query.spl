@@ -1,0 +1,9 @@
+index=main EventCode=4720
+| bin _time span=1h
+| stats count as user_created_count dc(TargetUserName) as users_created by Account_Name, Source_Network_Address, _time
+| where user_created_count >= 2 OR users_created >= 2
+| eval risk=case(
+user_created_count>=10,"CRITICAL_USER_CREATION",
+user_created_count>=5,"HIGH_USER_CREATION",
+user_created_count>=2,"MEDIUM_USER_CREATION"
+)
