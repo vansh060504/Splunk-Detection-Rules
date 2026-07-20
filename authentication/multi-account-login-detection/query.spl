@@ -1,0 +1,5 @@
+index=main EventCode=4624 Account_Name!="*$" Account_Name!="ANONYMOUS LOGON"
+| bin _time span=1h
+| stats dc(Account_Name) as user_count values(Account_Name) as accounts by Source_Network_Address, _time
+| where user_count >= 5
+| eval risk="MULTI_ACCOUNT_ACCESS_SUSPICIOUS"
