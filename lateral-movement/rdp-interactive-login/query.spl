@@ -1,0 +1,14 @@
+index=main EventCode=4624 Logon_Type=10
+| rex field=Message "New Logon:\s+Security ID:\s+[^\n]+\s+Account Name:\s+(?<LoggedOnUser>[^\r\n]+)"
+| where LoggedOnUser!="ANONYMOUS LOGON"
+| where LoggedOnUser!="SYSTEM"
+| where LoggedOnUser!="-"
+| bin _time span=15m
+| stats count as rdp_sessions dc(Source_Network_Address) as unique_source_ips values(Source_Network_Address) as source_ips values(Workstation_Name) as workstations by LoggedOnUser ComputerName _time
+| where rdp_sessions>=2 OR unique_source_ips>1
+| eval risk=case(
+    unique_source_ips>1,"HIGH_RDP_ACTIVITY",
+    rdp_sessions>=5,"HIGH_RDP_ACTIVITY",
+    1=1,"MEDIUM_RDP_ACTIVITY"
+)
+| table _time ComputerName LoggedOnUser rdp_sessions source_ips workstations risk
