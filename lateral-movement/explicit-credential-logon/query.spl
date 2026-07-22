@@ -1,0 +1,11 @@
+index=main EventCode=4648
+| where Account_Name!="SYSTEM" AND Account_Name!="*$"
+| bin _time span=15m
+| stats count as explicit_logons values(Process_Name) as processes values(Network_Address) as source_ips values(Target_Server_Name) as target_servers by Account_Name ComputerName _time
+| where explicit_logons>=3
+| eval risk=case(
+    explicit_logons>=10,"CRITICAL_EXPLICIT_CREDENTIAL_USAGE",
+    explicit_logons>=5,"HIGH_EXPLICIT_CREDENTIAL_USAGE",
+    1=1,"MEDIUM_EXPLICIT_CREDENTIAL_USAGE"
+)
+| table _time ComputerName Account_Name explicit_logons source_ips target_servers processes risk
