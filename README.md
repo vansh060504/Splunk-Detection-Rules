@@ -104,7 +104,6 @@ The development process consists of:
 
 Every detection folder contains:
 
-- **README.md** – Detection overview and investigation guidance
 - **query.spl** – Splunk SPL detection query
 - **sample-output.md** – Example detection results
 - **references.md** – Microsoft, Splunk, and MITRE references
