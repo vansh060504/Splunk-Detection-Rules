@@ -1,4 +1,12 @@
 index=main EventCode=4672
 | where Account_Name!="SYSTEM"
-| stats count values(Privileges) as privileges by ComputerName Account_Name
-| sort -count
+| stats count as privileged_logons values(Privileges) as privileges latest(_time) as detection_time by ComputerName Account_Name
+| eval risk=case(
+    privileged_logons>=15,"HIGH_PRIVILEGED_ACTIVITY",
+    privileged_logons>=5,"MEDIUM_PRIVILEGED_ACTIVITY",
+    1=1,"LOW_PRIVILEGED_ACTIVITY"
+)
+| convert ctime(detection_time)
+| rename detection_time as Time
+| sort - privileged_logons
+| table Time ComputerName Account_Name privileged_logons privileges risk
