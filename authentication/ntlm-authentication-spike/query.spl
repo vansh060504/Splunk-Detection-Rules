@@ -1,0 +1,11 @@
+index=main EventCode=4776
+| where Logon_Account!="SYSTEM" AND Logon_Account!="-"
+| bin _time span=15m
+| stats count as ntlm_attempts dc(Logon_Account) as unique_users values(Logon_Account) as users by Source_Workstation _time
+| where ntlm_attempts>=20 OR unique_users>=5
+| eval risk=case(
+    ntlm_attempts>=50,"CRITICAL_NTLM_ACTIVITY",
+    ntlm_attempts>=30,"HIGH_NTLM_ACTIVITY",
+    1=1,"MEDIUM_NTLM_ACTIVITY"
+)
+| table _time Source_Workstation ntlm_attempts unique_users users risk
