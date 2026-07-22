@@ -1,7 +1,4 @@
-index=main EventCode=4625 Account_Name!="-"
-| bin _time span=1h
-| stats count as fail_count by Account_Name, Source_Network_Address, _time
-| eventstats avg(fail_count) as avg_fail stdev(fail_count) as stdev_fail by Account_Name
-| eval threshold = avg_fail + (2 * stdev_fail)
-| where fail_count > threshold AND fail_count >= 3
-| eval risk="FAILED_LOGIN_ANOMALY"
+index=main EventCode=4625
+| bin _time span=10m
+| stats count as fail_count by Account_Name Source_Network_Address _time
+| where fail_count>=5
