@@ -1,5 +1,6 @@
 index=main EventCode=4648
-| where Account_Name!="SYSTEM" AND Account_Name!="*$"
+| where Account_Name!="SYSTEM"
+| where NOT match(Account_Name,"\\$$")
 | bin _time span=15m
 | stats count as explicit_logons values(Process_Name) as processes values(Network_Address) as source_ips values(Target_Server_Name) as target_servers by Account_Name ComputerName _time
 | where explicit_logons>=3
