@@ -1,10 +1,16 @@
 index=main EventCode=4672
-| where Account_Name!="SYSTEM"
+| where NOT like(Account_Name,"DWM-%")
+    AND NOT like(Account_Name,"UMFD-%")
+    AND Account_Name!="SYSTEM"
+    AND Account_Name!="LOCAL SERVICE"
+    AND Account_Name!="NETWORK SERVICE"
+    AND Account_Name!="ANONYMOUS LOGON"
+    AND Account_Name!="-"
 | stats count as privileged_logons values(Privileges) as privileges latest(_time) as detection_time by ComputerName Account_Name
 | eval risk=case(
     privileged_logons>=15,"HIGH_PRIVILEGED_ACTIVITY",
     privileged_logons>=5,"MEDIUM_PRIVILEGED_ACTIVITY",
-    1=1,"LOW_PRIVILEGED_ACTIVITY"
+    true(),"LOW_PRIVILEGED_ACTIVITY"
 )
 | convert ctime(detection_time)
 | rename detection_time as Time
